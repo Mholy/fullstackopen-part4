@@ -27,11 +27,29 @@ const initialBlogs = [
   },
 ]
 
+const defaultUser = { username: 'root', password: 'secret' }
+
+let token
+beforeAll(async () => {
+  await User.deleteMany({})
+  await api.post('/api/users').send(defaultUser)
+
+  const login = await api
+    .post('/api/login')
+    .send(defaultUser)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  token = login.body.token
+  expect(token).toBeDefined()
+})
+
 beforeAll(async () => {
   await Blog.deleteMany({})
 
-  const blogObjects = initialBlogs.map((blog) => new Blog(blog))
-  const promiseArray = blogObjects.map((blog) => blog.save())
+  const promiseArray = initialBlogs.map((blog) =>
+    api.post('/api/blogs').set('Authorization', `bearer ${token}`).send(blog)
+  )
 
   await Promise.all(promiseArray)
 })
@@ -68,6 +86,7 @@ describe('addition of a new blog entry', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `bearer ${token}`)
       .send(newEntry)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -86,6 +105,7 @@ describe('addition of a new blog entry', () => {
 
     const createdEntry = await api
       .post('/api/blogs')
+      .set('Authorization', `bearer ${token}`)
       .send(newEntry)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -100,7 +120,11 @@ describe('addition of a new blog entry', () => {
       url: 'http://url',
     }
 
-    await api.post('/api/blogs').send(newEntry).expect(400)
+    await api
+      .post('/api/blogs')
+      .set('Authorization', `bearer ${token}`)
+      .send(newEntry)
+      .expect(400)
 
     const atEnd = await api.get('/api/blogs')
 
@@ -113,7 +137,10 @@ describe('deletion of a blog post', () => {
     const atStart = await api.get('/api/blogs')
     const postToDelete = atStart.body[0]
 
-    await api.delete(`/api/blogs/${postToDelete.id}`).expect(204)
+    await api
+      .delete(`/api/blogs/${postToDelete.id}`)
+      .set('Authorization', `bearer ${token}`)
+      .expect(204)
 
     const atEnd = await api.get('/api/blogs')
 
@@ -144,12 +171,6 @@ describe('updating of a blog post', () => {
 })
 
 describe('when there is initially one user at db', () => {
-  beforeEach(async () => {
-    await User.deleteMany({})
-    const user = new User({ username: 'root', password: 'sekret' })
-    await user.save()
-  })
-
   test('creation succeeds with a fresh username and valid data', async () => {
     const atStart = await api.get('/api/users')
 

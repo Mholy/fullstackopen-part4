@@ -48,11 +48,10 @@ bloglistRouter.delete('/:id', async (req, res, next) => {
 
     if (blog.user.toString() === user.id.toString()) {
       await blog.remove()
+      return res.status(204).end()
     } else {
       return res.status(403).end()
     }
-
-    res.status(204).end()
   } catch (err) {
     next(err)
   }
