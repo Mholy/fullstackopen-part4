@@ -1,0 +1,11 @@
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+# Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXIxIiwiaWQiOiI1ZjIxYTdjNDYxZDNkMTdjNGMzYjM4MTMiLCJpYXQiOjE1OTYwNDEyMjJ9.GG0u44_5q7-LPA8Rj87YfNvv1qlYpk6WM1FV8VyU_CQ
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXIyIiwiaWQiOiI1ZjIxYmEzZTJhZjUwMzg4MjBhMGQ4ODYiLCJpYXQiOjE1OTYwNDU5MDF9.EdPG_J1Mq9D0Dg5kyDBwh2y2kkqbOwO9FbOuExclfq8
+
+{
+    "title": "Hello World",
+    "author": "User 2",
+    "url": "http://url",
+    "likes": 0
+}
