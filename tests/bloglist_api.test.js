@@ -102,9 +102,43 @@ describe('addition of a new blog entry', () => {
     await api.post('/api/blogs').send(newEntry).expect(400)
 
     const atEnd = await api.get('/api/blogs')
-    console.log(atEnd.body)
 
     expect(atEnd.body.length).toBe(atStart.body.length)
+  })
+})
+
+describe('deletion of a blog post', () => {
+  test('succeeds with status code 204 if id is valid', async () => {
+    const atStart = await api.get('/api/blogs')
+    const postToDelete = atStart.body[0]
+
+    await api.delete(`/api/blogs/${postToDelete.id}`).expect(204)
+
+    const atEnd = await api.get('/api/blogs')
+
+    expect(atEnd.body.length).toBe(atStart.body.length - 1)
+  })
+})
+
+describe('updating of a blog post', () => {
+  test('succeed with status code 200', async () => {
+    const atStart = await api.get('/api/blogs')
+    const postToUpdate = atStart.body[0]
+
+    const updatedPost = {
+      ...postToUpdate,
+      likes: 100,
+    }
+
+    await api
+      .put(`/api/blogs/${postToUpdate.id}`)
+      .send(updatedPost)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const atEnd = await api.get('/api/blogs')
+
+    expect(atEnd.body[0].likes).toBe(100)
   })
 })
 
