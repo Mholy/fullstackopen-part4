@@ -6,12 +6,14 @@
     "author": "Eugene Leto <mholy@protonmail.ch>",
     "license": "MIT",
     "dependencies": {
+        "bcrypt": "^5.0.0",
         "body-parser": "^1.19.0",
         "cors": "^2.8.5",
         "dotenv": "^8.1.0",
         "express": "^4.17.1",
         "lodash": "^4.17.15",
-        "mongoose": "^5.7.1"
+        "mongoose": "^5.7.1",
+        "mongoose-unique-validator": "^2.0.3"
     },
     "devDependencies": {
         "eslint": "^6.5.0",

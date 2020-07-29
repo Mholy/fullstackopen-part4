@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const app = require('../app')
 const supertest = require('supertest')
 const api = supertest(app)
@@ -139,6 +140,98 @@ describe('updating of a blog post', () => {
     const atEnd = await api.get('/api/blogs')
 
     expect(atEnd.body[0].likes).toBe(100)
+  })
+})
+
+describe('when there is initially one user at db', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+    const user = new User({ username: 'root', password: 'sekret' })
+    await user.save()
+  })
+
+  test('creation succeeds with a fresh username and valid data', async () => {
+    const atStart = await api.get('/api/users')
+
+    const newUser = {
+      username: 'test',
+      password: 'foobar',
+      name: 'User Test',
+    }
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const atEnd = await api.get('/api/users')
+
+    expect(atEnd.body.length).toBe(atStart.body.length + 1)
+
+    const usernames = atEnd.body.map((u) => u.username)
+    expect(usernames).toContain('test')
+  })
+
+  test('creation fails with proper statuscode and message if username already taken', async () => {
+    const atStart = await api.get('/api/users')
+
+    const newUser = {
+      username: 'root',
+      name: 'Superuser',
+      password: 'salainen',
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    expect(result.body.error).toContain('`username` to be unique')
+
+    const usersAtEnd = await api.get('/api/users')
+    expect(usersAtEnd.body.length).toBe(atStart.body.length)
+  })
+
+  test('creation fails with proper statuscode and message if username or password are missing', async () => {
+    const atStart = await api.get('/api/users')
+
+    const newUser = {
+      name: 'Superuser',
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    expect(result.body.error).toContain('`password` is required')
+
+    const usersAtEnd = await api.get('/api/users')
+    expect(usersAtEnd.body.length).toBe(atStart.body.length)
+  })
+
+  test('creation fails with proper statuscode and message if username or password are shorter 3', async () => {
+    const atStart = await api.get('/api/users')
+
+    const newUser = {
+      name: 'Superuser',
+      username: 'te',
+      password: 'test',
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    expect(result.body.error).toContain('minimum allowed length (3)')
+
+    const usersAtEnd = await api.get('/api/users')
+    expect(usersAtEnd.body.length).toBe(atStart.body.length)
   })
 })
 

@@ -12,7 +12,7 @@ bloglistRouter.post('/', async (request, response) => {
 
   try {
     const savedBlog = await blog.save()
-    response.status(201).json(savedBlog.toJSON()).end()
+    response.status(201).json(savedBlog)
   } catch (error) {
     response.status(400).end()
   }
@@ -41,7 +41,7 @@ bloglistRouter.put('/:id', async (req, res) => {
     const updatedPost = await Blog.findByIdAndUpdate(req.params.id, post, {
       new: true,
     })
-    res.json(updatedPost.toJSON()).end()
+    res.json(updatedPost)
   } catch (err) {
     res.status(400).end()
   }
